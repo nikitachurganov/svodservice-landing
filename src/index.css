@@ -9,6 +9,10 @@
 
   --app-header-height: 56px;
   --container-max-width: 1180px;
+
+  /* Primary button states as in the service (light theme) */
+  --brand-hover: #cf602d;
+  --brand-active: #9c2802;
 }
 
 *,
@@ -80,7 +84,7 @@ button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 [role='button']:focus-visible {
-  outline: 2px solid var(--brand-600);
+  outline: 2px solid var(--brand-500);
   outline-offset: 2px;
 }
 
@@ -233,7 +237,7 @@ input:focus-visible,
   left: 0;
   right: 0;
   height: 2px;
-  background: var(--brand-600);
+  background: var(--brand-500);
 }
 
 .app-header__actions {
@@ -326,14 +330,14 @@ input:focus-visible,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--brand-600);
+  background: var(--brand-500);
   color: #ffffff;
   font-size: 18px;
   transition: background 0.15s ease, opacity 0.15s ease;
 }
 
 .hero-form__send:hover:not(:disabled) {
-  background: var(--brand-700);
+  background: var(--brand-hover);
 }
 
 .hero-form__send:disabled {
@@ -538,30 +542,31 @@ input:focus-visible,
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 4px;
   text-align: center;
-  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0));
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0));
 }
 
 .survey-locked__icon {
-  width: 40px;
-  height: 40px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   background: var(--app-ink);
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 8px;
-  font-size: 16px;
+  margin-bottom: 10px;
+  font-size: 22px;
 }
 
 .survey-locked__overlay strong {
-  font-size: 16px;
+  font-size: 19px;
 }
 
-.survey-locked__overlay span {
-  font-size: 13px;
+.survey-locked__overlay > span:not(.survey-locked__icon) {
+  max-width: 340px;
+  font-size: 15px;
   color: var(--app-ink-muted);
 }
 
@@ -731,7 +736,7 @@ input:focus-visible,
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  background: var(--brand-600);
+  background: var(--brand-500);
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -940,7 +945,7 @@ input:focus-visible,
 .chat-item__share {
   flex-shrink: 0;
   font-size: 13px;
-  color: var(--brand-600);
+  color: var(--brand-500);
 }
 
 .chat-item__toggle {
@@ -1106,10 +1111,12 @@ input:focus-visible,
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
 .price-col__badge {
+  white-space: nowrap;
   padding: 1px 10px;
   border-radius: 999px;
   border: 1px solid var(--app-grid-line);

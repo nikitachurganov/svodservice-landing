@@ -125,10 +125,10 @@ export const AiShowcase: React.FC = () => {
     <section id="ai" className="section">
       <div className="container ai-showcase">
         <div className="ai-showcase__intro">
-          <h2 className="section-title">ИИ, который собирает и разбирает опросы</h2>
+          <h2 className="section-title">Соберём и разберём опрос любой сложности</h2>
           <p className="lead">
-            <strong>Два режима в одном диалоге.</strong> Сначала ИИ собирает анкету по научной методике,
-            потом находит выводы в ответах.
+            Сначала ИИ собирает анкету с использованием научных методик, потом делает выводы
+            по результатам исследования.
           </p>
 
           <Segmented<Mode>

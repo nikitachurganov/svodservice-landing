@@ -188,7 +188,7 @@ export const AiDemoModal: React.FC<AiDemoModalProps> = ({ isOpen, initialPrompt,
                   <LockOutlined />
                 </span>
                 <strong>+ ещё {hiddenCount} вопросов</strong>
-                <span>Полная анкета откроется в сервисе</span>
+                <span>Полная анкета уже готова, переходи в сервис, чтобы посмотреть</span>
               </div>
             </div>
           )}

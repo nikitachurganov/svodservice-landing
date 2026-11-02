@@ -56,7 +56,7 @@ export const Pricing: React.FC = () => (
           <li key={p.name} className={`price-col ${p.featured ? 'price-col--featured' : ''}`}>
             <div className="price-col__head">
               <h3>{p.name}</h3>
-              {p.featured && <span className="price-col__badge">Хит</span>}
+              {p.featured && <span className="price-col__badge">Выбор специалистов</span>}
             </div>
             <b className="price-col__price">{p.price}</b>
 

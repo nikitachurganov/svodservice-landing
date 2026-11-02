@@ -8,11 +8,23 @@ import {
 } from '@ant-design/icons';
 
 const ITEMS = [
-  { icon: <SyncOutlined />, title: 'Безлимит ответов', text: 'Опрос не закроется на сотом ответе ни на одном тарифе.' },
-  { icon: <ThunderboltOutlined />, title: 'ИИ-сборка анкеты', text: 'Из описания задачи в готовую анкету за секунды.' },
-  { icon: <SafetyCertificateOutlined />, title: 'Ловушки внимания', text: 'Боты и случайные клики не попадут в выборку.' },
-  { icon: <MessageOutlined />, title: 'ИИ-анализ ответов', text: 'Темы, проценты и цитаты из открытых ответов.' },
-  { icon: <FileExcelOutlined />, title: 'Экспорт в Excel и CSV', text: 'Сырые данные и графики в один клик.' },
+  { icon: <SyncOutlined />, title: 'Безлимит ответов', text: 'Даже на бесплатном тарифе можно проводить масштабные опросы.' },
+  { icon: <ThunderboltOutlined />, title: 'ИИ-конструктор анкет', text: 'Из описания задачи в готовую анкету за несколько секунд.' },
+  {
+    icon: <SafetyCertificateOutlined />,
+    title: 'Проверка качества ответов',
+    text: 'Ответы ботов и прохождения «наугад» можно исключить из анализа.',
+  },
+  {
+    icon: <MessageOutlined />,
+    title: 'Продвинутый анализ ответов',
+    text: 'Главные выводы по качественным данным, кросс-табуляция, корреляция, графики, а также ИИ-чат для анализа.',
+  },
+  {
+    icon: <FileExcelOutlined />,
+    title: 'Экспорт в Excel, CSV и PDF',
+    text: 'Сырые данные, графики и аналитический отчёт в один клик.',
+  },
 ];
 
 export const Benefits: React.FC = () => (
@@ -22,8 +34,7 @@ export const Benefits: React.FC = () => (
         <div className="section-head__text section-head__text--wide">
           <h2 className="section-title section-title--one-line">Всё для исследования в одном месте</h2>
           <p className="lead">
-            <strong>От первого вопроса до готовых выводов.</strong> Не нужно склеивать формы,
-            таблицы и ручной разбор ответов.
+            <strong>От идеи исследования до готовых выводов.</strong>
           </p>
         </div>
       </div>

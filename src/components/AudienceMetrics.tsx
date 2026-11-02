@@ -3,29 +3,29 @@ import { ReadOutlined, ExperimentOutlined, RiseOutlined, TeamOutlined } from '@a
 
 const METRICS = [
   {
-    value: '10 сек',
-    label: 'на анкету для диплома',
+    value: '< 10 сек',
+    label: 'на анкету любой сложности',
     text: 'ИИ соберёт анкету по ГОСТ со шкалами Лайкерта и паспортом исследования для второй главы.',
     icon: <ReadOutlined />,
     segment: 'Студенты и учёные',
   },
   {
     value: '5 мин',
-    label: 'на разбор открытых ответов',
+    label: 'на анализ качественных данных',
     text: 'ИИ сгруппирует боли из CustDev-интервью и подтвердит каждый вывод цитатой.',
     icon: <ExperimentOutlined />,
     segment: 'Продакты и стартапы',
   },
   {
-    value: '0',
-    label: 'лимитов на сбор ответов',
+    value: '∞',
+    label: 'ответов, лимитов нет',
     text: 'NPS, CSAT и CES без блокировки опроса посреди кампании.',
     icon: <RiseOutlined />,
     segment: 'Маркетинг и CX',
   },
   {
     value: '−80%',
-    label: 'времени на отчёт',
+    label: 'времени на создание отчёта',
     text: 'Пульс-опросы и eNPS со смартфона без регистрации. Руководитель получает готовую выжимку.',
     icon: <TeamOutlined />,
     segment: 'HR и команды',

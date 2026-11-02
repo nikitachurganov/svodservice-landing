@@ -18,11 +18,11 @@ export const App: React.FC = () => {
       locale={ruRU}
       theme={{
         token: {
-          colorPrimary: '#9a3412',
-          colorPrimaryHover: '#b83d09',
-          colorPrimaryActive: '#7a2605',
-          colorLink: '#9a3412',
-          colorLinkHover: '#b83d09',
+          colorPrimary: '#c2410c',
+          colorPrimaryHover: '#cf602d',
+          colorPrimaryActive: '#9c2802',
+          colorLink: '#c2410c',
+          colorLinkHover: '#cf602d',
           fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
           borderRadius: 8,
           colorBgContainer: '#ffffff',

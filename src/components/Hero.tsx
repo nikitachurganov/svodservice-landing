@@ -17,11 +17,11 @@ export const Hero: React.FC = () => {
   return (
     <section className="hero">
       <div className="container">
-        <h1 className="hero-title">Опрос по научной методике за 10 секунд</h1>
+        <h1 className="hero-title">Создай опрос по научным методикам за 10 секунд</h1>
 
         <p className="hero-lead lead">
-          <strong>Опишите задачу своими словами.</strong> ИИ подберёт методику, составит вопросы
-          и подготовит анкету к запуску. Сбор ответов без лимитов.
+          <strong>ИИ подберёт методики, составит вопросы и подготовит анкету.</strong> Лимита
+          на количество ответов — нет.
         </p>
 
         <form

@@ -30,6 +30,8 @@ export interface SurveyDraft {
   total_questions: number;
   questions: SurveyQuestion[];
   ai_summary: string;
+  // Черновик сохранён на сервере СВОД: по draft_id его можно забрать в аккаунт
+  from_service?: boolean;
 }
 
 export interface ChatMessage {
@@ -43,7 +45,7 @@ export interface ChatMessage {
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 // ИИ подбирает методику и составляет анкету двумя вызовами модели, это до минуты-двух
 const GENERATE_TIMEOUT_MS = 150000;
-const SERVICE_AUTH_URL = 'https://surveys.svodservice.ru/auth?mode=register';
+const SERVICE_URL = 'https://surveys.svodservice.ru';
 
 // Получение или создание анонимной сессии клиента
 export function getOrCreateClientSessionId(): string {
@@ -59,27 +61,12 @@ export function getOrCreateClientSessionId(): string {
   }
 }
 
-// Сохранение черновика и получение ссылки для бесшовного перехода
-export function saveDraftAndGetAuthUrl(draft: SurveyDraft, prompt: string): string {
-  try {
-    localStorage.setItem(
-      'svod_pending_draft',
-      JSON.stringify({
-        draft_id: draft.draft_id,
-        title: draft.title,
-        methodology: draft.methodology,
-        prompt,
-        questions: draft.questions,
-        total_questions: draft.total_questions,
-        created_at: Date.now(),
-      })
-    );
-  } catch (err) {
-    console.warn('Не удалось сохранить в localStorage:', err);
-  }
-
-  const encodedPrompt = encodeURIComponent(prompt.trim());
-  return `${SERVICE_AUTH_URL}&draft_id=${draft.draft_id}&prompt=${encodedPrompt}&source=landing_demo`;
+// Куда ведёт «Продолжить в сервисе». Черновик с сервера сервис после входа или регистрации
+// сразу превращает в опрос; шаблонная анкета (бэкенд был недоступен) там не хранится.
+export function getContinueUrl(draft: SurveyDraft): string {
+  return draft.from_service
+    ? `${SERVICE_URL}/demo/${encodeURIComponent(draft.draft_id)}`
+    : `${SERVICE_URL}/auth?mode=register`;
 }
 
 /**
@@ -110,7 +97,7 @@ export async function generateSurveyApi(prompt: string): Promise<SurveyDraft> {
 
     if (response.ok) {
       const data = await response.json();
-      return normalizeSurveyDraft(data, prompt);
+      return { ...normalizeSurveyDraft(data, prompt), from_service: true };
     }
 
     if (response.status === 429) {

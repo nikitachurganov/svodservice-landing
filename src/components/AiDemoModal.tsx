@@ -8,7 +8,7 @@ import {
 } from '@ant-design/icons';
 import {
   generateSurveyApi,
-  saveDraftAndGetAuthUrl,
+  getContinueUrl,
   type SurveyDraft,
   type SurveyQuestion,
 } from '../lib/surveyApi';
@@ -104,7 +104,7 @@ export const AiDemoModal: React.FC<AiDemoModalProps> = ({ isOpen, initialPrompt,
 
   const handleProceedToService = () => {
     if (!survey) return;
-    window.location.href = saveDraftAndGetAuthUrl(survey, initialPrompt);
+    window.location.href = getContinueUrl(survey);
   };
 
   const visible = survey ? survey.questions.slice(0, VISIBLE_COUNT) : [];

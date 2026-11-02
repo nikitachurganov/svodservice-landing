@@ -49,6 +49,44 @@ npm run preview
 
 ---
 
+## 🚢 Деплой (svodservice.ru)
+
+Лендинг — статика. Она раздаётся тем же nginx-контейнером, что и основной сервис (`svod-surveys-nginx-1`, проект в `/opt/svod`, compose-файл `docker-compose.surveys.yml`). В DNS A-записи `svodservice.ru` и `www` должны указывать на IP сервера.
+
+**1. Собрать и загрузить.** С локальной машины:
+
+```bash
+npm run build
+scp -r dist root@<IP_СЕРВЕРА>:/opt/landing
+```
+
+Для обновления: удалить старую `/opt/landing` на сервере и загрузить заново (иначе `scp` положит сборку в `/opt/landing/dist`). Перезапуск nginx не нужен.
+
+**2. Подключить в compose (один раз).** В `docker-compose.surveys.yml`, в `nginx.volumes`, добавить:
+
+```yaml
+- ./deploy/nginx/${LANDING_NGINX_CONF:-svodservice.ru.http.conf}:/etc/nginx/conf.d/landing.conf:ro
+- /opt/landing:/var/www/landing:ro
+```
+
+Положить в `/opt/svod/deploy/nginx/` файлы `nginx-svodservice.http.conf` → `svodservice.ru.http.conf` и `nginx-svodservice.conf` → `svodservice.ru.conf` из каталога [deploy](./deploy), затем `docker compose -f docker-compose.surveys.yml up -d nginx`.
+
+**3. Выпустить сертификат** (после того как DNS указывает на сервер):
+
+```bash
+docker run --rm \
+  -v svod-surveys_certbot_certs:/etc/letsencrypt \
+  -v svod-surveys_certbot_www:/var/www/certbot \
+  certbot/certbot certonly --webroot -w /var/www/certbot \
+  -d svodservice.ru -d www.svodservice.ru --email <EMAIL> --agree-tos --no-eff-email
+```
+
+**4. Включить HTTPS.** Добавить в `/opt/svod/.env` строку `LANDING_NGINX_CONF=svodservice.ru.conf` и выполнить `docker compose -f docker-compose.surveys.yml up -d nginx`.
+
+Если включить HTTPS-конфиг до выпуска сертификата, nginx не запустится вместе с основным сервисом. Продление сертификата выполняет cron из `DEPLOYMENT_VPS.md` на тома `svod-surveys_*`.
+
+---
+
 ## 🔗 Интеграция с сервисом «СВОД Опросы»
 
 Все кнопки действий настроены на прямые ссылки в рабочий сервис:

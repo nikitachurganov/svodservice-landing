@@ -5,5 +5,12 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
+    // ИИ-демо в dev ходит в бой, как и на проде через nginx
+    proxy: {
+      '/api/public/demo': {
+        target: 'https://surveys.svodservice.ru',
+        changeOrigin: true,
+      },
+    },
   },
 });

@@ -39,7 +39,10 @@ export interface ChatMessage {
   timestamp: number;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.surveys.svodservice.ru';
+// Тот же origin: nginx лендинга (и dev-прокси Vite) отправляет /api/public/demo/ в бэкенд СВОД
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+// ИИ подбирает методику и составляет анкету двумя вызовами модели, это до минуты-двух
+const GENERATE_TIMEOUT_MS = 150000;
 const SERVICE_AUTH_URL = 'https://surveys.svodservice.ru/auth?mode=register';
 
 // Получение или создание анонимной сессии клиента
@@ -84,11 +87,11 @@ export function saveDraftAndGetAuthUrl(draft: SurveyDraft, prompt: string): stri
  */
 export async function generateSurveyApi(prompt: string): Promise<SurveyDraft> {
   const sessionId = getOrCreateClientSessionId();
-  const endpoint = `${API_BASE_URL}/v1/public/demo/generate`;
+  const endpoint = `${API_BASE_URL}/public/demo/generate`;
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000);
+    const timeoutId = setTimeout(() => controller.abort(), GENERATE_TIMEOUT_MS);
 
     const response = await fetch(endpoint, {
       method: 'POST',
@@ -111,7 +114,12 @@ export async function generateSurveyApi(prompt: string): Promise<SurveyDraft> {
     }
 
     if (response.status === 429) {
-      throw new Error('Превышен лимит демо-генераций (5 в час). Зарегистрируйтесь для безлимитной работы.');
+      const body = await response.json().catch(() => null);
+      throw new Error(
+        typeof body?.detail === 'string'
+          ? body.detail
+          : 'Превышен лимит демо-генераций. Зарегистрируйтесь, чтобы продолжить в сервисе.'
+      );
     }
 
     console.warn(`API вернул статус ${response.status}. Используется резервный интеллектуальный пайплайн.`);

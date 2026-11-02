@@ -83,6 +83,8 @@ docker run --rm \
 
 **4. Включить HTTPS.** Добавить в `/opt/svod/.env` строку `LANDING_NGINX_CONF=svodservice.ru.conf` и выполнить `docker compose -f docker-compose.surveys.yml up -d nginx`.
 
+**ИИ-демо.** Поле «Тема или цель опроса» отправляет `POST /api/public/demo/generate`; HTTPS-конфиг проксирует только этот путь в `svod_api` (бэкенд СВОД, эндпоинт `/public/demo/generate`). Лимиты — переменные бэкенда `LANDING_DEMO_PER_IP_PER_HOUR` (5), `LANDING_DEMO_PER_DAY` (300), `LANDING_DEMO_MAX_QUESTIONS` (15). Если бэкенд недоступен, лендинг показывает шаблонную анкету. После правки конфига: скопировать его в `/opt/svod/deploy/nginx/svodservice.ru.conf` и выполнить `docker compose -f docker-compose.surveys.yml exec nginx nginx -s reload`.
+
 Если включить HTTPS-конфиг до выпуска сертификата, nginx не запустится вместе с основным сервисом. Продление сертификата выполняет cron из `DEPLOYMENT_VPS.md` на тома `svod-surveys_*`.
 
 ---

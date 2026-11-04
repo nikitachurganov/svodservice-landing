@@ -89,6 +89,14 @@ docker run --rm \
 
 ---
 
+## 🔎 SEO
+
+* `npm run build` после обычной сборки пререндерит страницу (`src/entry-server.tsx` → `scripts/prerender.mjs`): в `dist/index.html` попадают готовый HTML, стили antd и разметка schema.org (Organization, WebSite, SoftwareApplication с тарифами, FAQPage из `FAQ_ITEMS`). Клиент гидрирует этот HTML.
+* Мета-теги, canonical и Open Graph — в `index.html`; `robots.txt`, `sitemap.xml`, `og-cover.png` и иконки — в `public/`. При смене тарифов поправить цены в `scripts/prerender.mjs`.
+* Демо-страницы для iframe (`public/*-demo.html`) закрыты от индексации `noindex`.
+
+---
+
 ## 🔗 Интеграция с сервисом «СВОД Опросы»
 
 Все кнопки действий настроены на прямые ссылки в рабочий сервис:

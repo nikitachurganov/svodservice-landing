@@ -1,7 +1,8 @@
 import React from 'react';
 import { Collapse } from 'antd';
 
-const FAQ_ITEMS = [
+// Экспорт нужен пререндеру: из этих же вопросов собирается разметка FAQPage (scripts/prerender.mjs)
+export const FAQ_ITEMS = [
   {
     key: '1',
     label: 'Действительно ли сбор ответов бесплатный и без ограничений?',
@@ -50,7 +51,13 @@ export const FaqSection: React.FC = () => {
             <a href="mailto:support@svodservice.ru">support@svodservice.ru</a>
           </p>
         </div>
-        <Collapse items={FAQ_ITEMS} accordion ghost expandIconPlacement="end" />
+        {/* forceRender: ответы попадают в HTML свёрнутыми, поисковик их видит */}
+        <Collapse
+          items={FAQ_ITEMS.map((item) => ({ ...item, forceRender: true }))}
+          accordion
+          ghost
+          expandIconPlacement="end"
+        />
       </div>
     </section>
   );

@@ -1,125 +1,53 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button, Segmented } from 'antd';
-import { ArrowRightOutlined, DownOutlined, UpOutlined, MessageOutlined } from '@ant-design/icons';
-import { DEMO_AI_BUILD, DEMO_AI_ANALYZE, type DemoMessage, type DemoInsight } from '../data/landingData';
+import { ArrowRightOutlined } from '@ant-design/icons';
 
 type Mode = 'build' | 'analyze';
 
-const SCENARIOS: Record<Mode, { messages: DemoMessage[]; hint: string }> = {
+const STEPS: Mode[] = ['build', 'analyze'];
+
+/* Each step plays its own phone animation from public/ */
+const SCENARIOS: Record<Mode, { label: string; hint: string; demo: string; demoTitle: string }> = {
   build: {
-    messages: DEMO_AI_BUILD,
-    hint: 'Опишите задачу — ИИ подберёт методику, составит вопросы и поправит их по вашей просьбе.',
+    label: 'ИИ-сборка',
+    hint: 'Опишите задачу одним сообщением — ИИ подберёт методику, соберёт анкету и подготовит ссылку, которой можно поделиться.',
+    demo: '/ai-form-demo.html?embed=1',
+    demoTitle: 'Анимация: ИИ собирает форму по описанию в чате',
   },
   analyze: {
-    messages: DEMO_AI_ANALYZE,
+    label: 'ИИ-анализ',
     hint: 'Спросите о результатах — ИИ сгруппирует ответы по темам и подтвердит каждый вывод цитатой.',
+    demo: '/ai-analysis-demo.html?embed=1',
+    demoTitle: 'Анимация: ИИ разбирает ответы опроса и показывает отчёт с темами и цитатами',
   },
-};
-
-const REVEAL_STEP_MS = 900;
-
-const pluralMessages = (n: number) => {
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return 'сообщение';
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'сообщения';
-  return 'сообщений';
 };
 
 const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-const Insight: React.FC<{ insight: DemoInsight; defaultOpen: boolean }> = ({ insight, defaultOpen }) => {
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <li className="chat-item">
-      <div className="chat-item__row">
-        <span>{insight.title}</span>
-        <span className="chat-item__share">{insight.share}</span>
-      </div>
-      <button type="button" className="chat-item__toggle" aria-expanded={open} onClick={() => setOpen(!open)}>
-        Цитата {open ? <UpOutlined style={{ fontSize: 10 }} /> : <DownOutlined style={{ fontSize: 10 }} />}
-      </button>
-      {open && <p className="chat-item__quote">{insight.quote}</p>}
-    </li>
-  );
-};
-
-const ChatMessage: React.FC<{ msg: DemoMessage }> = ({ msg }) => {
-  const isAi = msg.role === 'ai';
-  return (
-    <div className={`chat-msg ${isAi ? 'chat-msg--ai' : ''}`}>
-      <span className="chat-msg__avatar" aria-hidden="true">
-        {isAi ? 'ИИ' : 'Вы'}
-      </span>
-      <div>
-        <p className="chat-msg__who">
-          <strong>{isAi ? 'СВОД ИИ' : 'Вы'}</strong>, {isAi ? 'методолог' : 'исследователь'}
-        </p>
-        <div className="chat-msg__bubble">
-          <p>{msg.text}</p>
-
-          {msg.questions && (
-            <ul className="chat-msg__items">
-              {msg.questions.map((q) => (
-                <li key={q.text} className="chat-item">
-                  <span className="chat-item__type">{q.type}</span>
-                  {q.text}
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {msg.insights && (
-            <ul className="chat-msg__items">
-              {msg.insights.map((insight, idx) => (
-                <Insight key={insight.title} insight={insight} defaultOpen={idx === 0} />
-              ))}
-            </ul>
-          )}
-
-          {msg.note && <p className="chat-msg__note">{msg.note}</p>}
-        </div>
-      </div>
-    </div>
-  );
-};
-
 export const AiShowcase: React.FC = () => {
   const [mode, setMode] = useState<Mode>('build');
-  const [inView, setInView] = useState(false);
-  const [shown, setShown] = useState(0);
-  const panelRef = useRef<HTMLDivElement>(null);
+  const stepRefs = useRef<Record<Mode, HTMLDivElement | null>>({ build: null, analyze: null });
 
-  const { messages, hint } = SCENARIOS[mode];
-
-  // Start the dialogue only once the panel scrolls into view
+  // The step crossing the middle of the screen drives the toggle and the description on the left
   useEffect(() => {
-    const el = panelRef.current;
-    if (!el) return;
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.3 }
+      (entries) =>
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) setMode((entry.target as HTMLElement).dataset.mode as Mode);
+        }),
+      { rootMargin: '-45% 0px -45% 0px' }
     );
-    observer.observe(el);
+    STEPS.forEach((step) => {
+      const el = stepRefs.current[step];
+      if (el) observer.observe(el);
+    });
     return () => observer.disconnect();
   }, []);
 
-  // Reveal messages one by one; restart when the scenario changes
-  useEffect(() => {
-    if (!inView) return;
-    if (prefersReducedMotion()) {
-      setShown(messages.length);
-      return;
-    }
-    setShown(0);
-    const timers = messages.map((_, idx) => window.setTimeout(() => setShown(idx + 1), idx * REVEAL_STEP_MS));
-    return () => timers.forEach((t) => window.clearTimeout(t));
-  }, [inView, messages]);
+  const goTo = (step: Mode) => {
+    setMode(step);
+    stepRefs.current[step]?.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'center' });
+  };
 
   return (
     <section id="ai" className="section">
@@ -132,15 +60,16 @@ export const AiShowcase: React.FC = () => {
           </p>
 
           <Segmented<Mode>
+            className="ai-showcase__modes"
             size="large"
             value={mode}
-            onChange={setMode}
-            options={[
-              { label: 'ИИ-сборка', value: 'build' },
-              { label: 'ИИ-анализ', value: 'analyze' },
-            ]}
+            onChange={goTo}
+            options={STEPS.map((step) => ({ label: SCENARIOS[step].label, value: step }))}
           />
-          <p className="ai-showcase__mode-hint">{hint}</p>
+          {/* key restarts the fade-in each time the step changes */}
+          <p key={mode} className="ai-showcase__mode-hint">
+            {SCENARIOS[mode].hint}
+          </p>
 
           <Button
             type="primary"
@@ -151,23 +80,34 @@ export const AiShowcase: React.FC = () => {
           >
             Попробовать в сервисе
           </Button>
-          <p className="caption">Пример диалога. В сервисе ИИ работает с вашими данными.</p>
         </div>
 
-        <div ref={panelRef} className="chat-panel grid-frame">
-          <div className="chat-panel__head">
-            <span>
-              <MessageOutlined /> Диалог с ИИ
-            </span>
-            <span>
-              {messages.length} {pluralMessages(messages.length)}
-            </span>
-          </div>
-          <div className="chat-panel__body" aria-live="polite">
-            {messages.slice(0, shown).map((msg, idx) => (
-              <ChatMessage key={`${mode}-${idx}`} msg={msg} />
-            ))}
-          </div>
+        <div className="ai-showcase__steps">
+          {STEPS.map((step) => (
+            <div
+              key={step}
+              ref={(el) => {
+                stepRefs.current[step] = el;
+              }}
+              data-mode={step}
+              className={`ai-step ${mode === step ? 'is-active' : ''}`}
+            >
+              {/* On mobile the left column isn't sticky, so each step carries its own caption */}
+              <p className="ai-step__hint">
+                <strong>{SCENARIOS[step].label}</strong>
+                {SCENARIOS[step].hint}
+              </p>
+
+              <div className="ai-showcase__phone">
+                <iframe
+                  src={SCENARIOS[step].demo}
+                  title={SCENARIOS[step].demoTitle}
+                  loading="lazy"
+                  scrolling="no"
+                />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>

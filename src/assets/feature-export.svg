@@ -1,0 +1,40 @@
+<svg width="694" height="617" viewBox="-17 -3 694 617" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <!-- Файл отчёта — акцент; нижний правый угол уходит под стеклянную кнопку и размывается -->
+  <g id="back">
+    <path d="M206 40H390L470 120V404Q470 440 434 440H206Q170 440 170 404V76Q170 40 206 40Z" fill="#FD6A12"/>
+    <path d="M390 40L470 120H414Q390 120 390 96Z" fill="#FEC3A0"/>
+    <rect x="215" y="176" width="170" height="34" rx="17" fill="white"/>
+    <rect x="215" y="240" width="210" height="34" rx="17" fill="white"/>
+    <rect x="215" y="304" width="130" height="34" rx="17" fill="white"/>
+  </g>
+  <clipPath id="glass">
+    <circle cx="470" cy="430" r="140"/>
+  </clipPath>
+  <filter id="frost" x="-20%" y="-20%" width="140%" height="140%">
+    <feGaussianBlur stdDeviation="16"/>
+  </filter>
+  <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
+    <stop stop-color="#fff" stop-opacity=".9"/>
+    <stop offset=".4" stop-color="#fff" stop-opacity=".15"/>
+    <stop offset=".75" stop-color="#fff" stop-opacity=".05"/>
+    <stop offset="1" stop-color="#fff" stop-opacity=".6"/>
+  </linearGradient>
+</defs>
+
+<!-- Приглушённый файл сзади -->
+<path d="M96 80H260L340 160V414Q340 450 304 450H96Q60 450 60 414V116Q60 80 96 80Z" fill="#FEC3A0" fill-opacity="0.7" transform="rotate(-8 200 265)"/>
+
+<use href="#back"/>
+
+<!-- Стеклянная кнопка: под ней файл размыт, сверху тонировка и блик по кромке -->
+<g clip-path="url(#glass)">
+  <rect x="330" y="290" width="280" height="280" fill="#F5F5F5"/>
+  <use href="#back" filter="url(#frost)"/>
+  <rect x="330" y="290" width="280" height="280" fill="#FD6A12" fill-opacity="0.33"/>
+</g>
+<circle cx="470" cy="430" r="138" stroke="url(#rim)" stroke-width="4"/>
+
+<!-- Скачать -->
+<path d="M470 362V470M424 426L470 472L516 426M428 514H512" stroke="white" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

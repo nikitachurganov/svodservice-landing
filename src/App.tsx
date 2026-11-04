@@ -3,7 +3,7 @@ import { Button, ConfigProvider } from 'antd';
 import ruRU from 'antd/locale/ru_RU';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
-import { VideoDemoPlaceholder } from './components/VideoDemoPlaceholder';
+import { WorkspaceDemo } from './components/WorkspaceDemo';
 import { Benefits } from './components/Benefits';
 import { AiShowcase } from './components/AiShowcase';
 import { AudienceMetrics } from './components/AudienceMetrics';
@@ -26,7 +26,7 @@ export const App: React.FC = () => {
           fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
           borderRadius: 8,
           colorBgContainer: '#ffffff',
-          colorBgLayout: '#faf9f7',
+          colorBgLayout: '#ffffff',
           colorText: '#211d1a',
           colorTextSecondary: '#6f6862',
           colorBorder: '#d9d4ce',
@@ -59,8 +59,8 @@ export const App: React.FC = () => {
           {/* 1. Заголовок, описание и генератор опроса */}
           <Hero />
 
-          {/* 2. Демо интерфейса (заглушка до готового видео) */}
-          <VideoDemoPlaceholder />
+          {/* 2. Демо интерфейса: агенты работают в окне сервиса */}
+          <WorkspaceDemo />
 
           {/* 3. Основные возможности */}
           <Benefits />

@@ -1,34 +1,25 @@
 import React from 'react';
-import { ReadOutlined, ExperimentOutlined, RiseOutlined, TeamOutlined } from '@ant-design/icons';
 
 const METRICS = [
   {
     value: '< 10 сек',
     label: 'на анкету любой сложности',
     text: 'ИИ соберёт анкету по ГОСТ со шкалами Лайкерта и паспортом исследования для второй главы.',
-    icon: <ReadOutlined />,
-    segment: 'Студенты и учёные',
   },
   {
     value: '5 мин',
     label: 'на анализ качественных данных',
     text: 'ИИ сгруппирует боли из CustDev-интервью и подтвердит каждый вывод цитатой.',
-    icon: <ExperimentOutlined />,
-    segment: 'Продакты и стартапы',
   },
   {
     value: '∞',
     label: 'ответов, лимитов нет',
     text: 'NPS, CSAT и CES без блокировки опроса посреди кампании.',
-    icon: <RiseOutlined />,
-    segment: 'Маркетинг и CX',
   },
   {
     value: '−80%',
     label: 'времени на создание отчёта',
     text: 'Пульс-опросы и eNPS со смартфона без регистрации. Руководитель получает готовую выжимку.',
-    icon: <TeamOutlined />,
-    segment: 'HR и команды',
   },
 ];
 
@@ -47,16 +38,10 @@ export const AudienceMetrics: React.FC = () => (
 
       <ul className="metrics-row">
         {METRICS.map((m) => (
-          <li key={m.segment} className="metric">
+          <li key={m.value} className="metric">
             <span className="metric__value">{m.value}</span>
             <span className="metric__label">{m.label}</span>
             <p className="metric__text">{m.text}</p>
-            <div className="metric__who">
-              <span className="metric__who-icon" aria-hidden="true">
-                {m.icon}
-              </span>
-              {m.segment}
-            </div>
           </li>
         ))}
       </ul>

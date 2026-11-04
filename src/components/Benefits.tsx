@@ -1,27 +1,25 @@
 import React from 'react';
-import {
-  SyncOutlined,
-  ThunderboltOutlined,
-  SafetyCertificateOutlined,
-  MessageOutlined,
-  FileExcelOutlined,
-} from '@ant-design/icons';
+import unlimitedAnswersImg from '../assets/unlimited-answers.svg';
+import aiBuilderImg from '../assets/feature-ai-builder.svg';
+import qualityImg from '../assets/feature-quality.svg';
+import analysisImg from '../assets/feature-analysis.svg';
+import exportImg from '../assets/feature-export.svg';
 
 const ITEMS = [
-  { icon: <SyncOutlined />, title: 'Безлимит ответов', text: 'Даже на бесплатном тарифе можно проводить масштабные опросы.' },
-  { icon: <ThunderboltOutlined />, title: 'ИИ-конструктор анкет', text: 'Из описания задачи в готовую анкету за несколько секунд.' },
+  { image: unlimitedAnswersImg, title: 'Безлимит ответов', text: 'Даже на бесплатном тарифе можно проводить масштабные опросы.' },
+  { image: aiBuilderImg, title: 'ИИ-конструктор анкет', text: 'Из описания задачи в готовую анкету за несколько секунд.' },
   {
-    icon: <SafetyCertificateOutlined />,
+    image: qualityImg,
     title: 'Проверка качества ответов',
     text: 'Ответы ботов и прохождения «наугад» можно исключить из анализа.',
   },
   {
-    icon: <MessageOutlined />,
+    image: analysisImg,
     title: 'Продвинутый анализ ответов',
     text: 'Главные выводы по качественным данным, кросс-табуляция, корреляция, графики, а также ИИ-чат для анализа.',
   },
   {
-    icon: <FileExcelOutlined />,
+    image: exportImg,
     title: 'Экспорт в Excel, CSV и PDF',
     text: 'Сырые данные, графики и аналитический отчёт в один клик.',
   },
@@ -42,9 +40,7 @@ export const Benefits: React.FC = () => (
       <ul className="feature-grid">
         {ITEMS.map((item) => (
           <li key={item.title} className="feature-cell">
-            <span className="feature-cell__icon" aria-hidden="true">
-              {item.icon}
-            </span>
+            <img className="feature-cell__media" src={item.image} alt="" aria-hidden="true" />
             <h3>{item.title}</h3>
             <p>{item.text}</p>
           </li>

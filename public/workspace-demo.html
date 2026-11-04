@@ -1,0 +1,733 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>СВОД Опросы за работой</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>if (/[?&]embed=1/.test(location.search)) document.documentElement.classList.add('embed');</script>
+<style>
+  /* Копия интерфейса surveys.svodservice.ru (страница опроса) по исходникам сервиса:
+     те же токены темы, шапка «СВОД | Опросы», вкладки, таблица ответов, ИИ-резюме и панель «Спросить ИИ».
+     Окно рисуется в фиксированном размере и масштабируется под ширину iframe;
+     на узком экране — мобильная раскладка сервиса (карточки вместо таблицы, панель на всю ширину). */
+  :root {
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --text: #171a1f;
+    --text-2: #4b5563;
+    --border: #cbd1d8;
+    --split: #e2e5e9;
+    --primary: #c2410c;
+    --danger: #dc2626;
+    --chart: #1783ff;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; overflow: hidden; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font: 14px/1.5715 Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .embed body { background: transparent; }
+  svg { flex: none; }
+
+  .stage { position: relative; width: 1200px; height: 760px; transform-origin: 0 0; transition: opacity .6s ease; }
+  .stage.fade { opacity: 0; }
+  .stage.instant * { transition: none !important; animation: none !important; }
+  .stage::before {
+    content: '';
+    position: absolute;
+    inset: 35% 6% 0;
+    border-radius: 50%;
+    background: radial-gradient(closest-side at 25% 50%, rgba(251, 166, 116, .3), transparent), radial-gradient(closest-side at 78% 60%, rgba(253, 106, 18, .16), transparent);
+    filter: blur(40px);
+    pointer-events: none;
+  }
+
+  /* ---------- Окно браузера ---------- */
+  .win {
+    position: absolute;
+    inset: 14px 18px 26px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 12px;
+    background: var(--bg);
+    border: 1px solid #dfe3e8;
+    box-shadow: 0 30px 60px -28px rgba(16, 24, 40, .3), 0 2px 6px rgba(16, 24, 40, .05);
+    overflow: hidden;
+  }
+  .bar { flex: none; height: 36px; display: flex; align-items: center; gap: 14px; padding: 0 14px; background: #eef0f3; border-bottom: 1px solid var(--split); }
+  .bar .dots { display: flex; gap: 6px; }
+  .bar .dots i { width: 10px; height: 10px; border-radius: 50%; background: #d5d9df; }
+  .url { flex: 0 1 420px; margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 6px; height: 24px; border-radius: 6px; background: #fff; font-size: 12px; color: var(--text-2); white-space: nowrap; overflow: hidden; }
+  .url svg { color: #9aa1aa; }
+
+  .app { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
+  /* ---------- Шапка сервиса ---------- */
+  .hdr { flex: none; display: flex; align-items: stretch; height: 56px; background: var(--surface); border-bottom: 1px solid var(--split); }
+  .brand { flex: none; display: flex; align-items: center; padding: 4px 8px; border-inline-end: 1px solid var(--split); }
+  .brand a { display: flex; align-items: center; gap: 12px; padding: 0 16px; }
+  .brand img { width: 100px; height: 20px; object-fit: contain; object-position: left center; }
+  .brand span { padding-left: 12px; border-left: 1px solid var(--split); color: var(--text-2); font-size: 15px; font-weight: 500; line-height: 24px; }
+  .hdr-main { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 20px; }
+  .crumbs { display: flex; align-items: center; gap: 8px; color: var(--text-2); white-space: nowrap; }
+  .crumbs b { font-weight: 400; color: var(--text); }
+  .icon-btn { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 6px; color: var(--text); }
+  .profile { flex: none; display: flex; align-items: center; gap: 12px; width: 240px; padding: 4px 16px; border-inline-start: 1px solid var(--split); }
+  .profile .ava { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 6px; background: #b8bec7; color: #fff; font-size: 14px; }
+  .profile div { display: flex; flex-direction: column; font-size: 12px; line-height: 20px; min-width: 0; }
+  .profile small { font-size: 12px; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* ---------- Страница опроса ---------- */
+  .page { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  .ph { flex: none; position: relative; z-index: 2; padding-top: 16px; background: var(--surface); border-bottom: 1px solid var(--split); box-shadow: 0 1px 3px rgba(0, 0, 0, .06); }
+  .wrap { padding: 0 32px; }
+  .ph-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .ph-title { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .ph-title h1 { margin: 0; font-size: 22px; line-height: 1.3; font-weight: 600; }
+  .tag { display: inline-flex; align-items: center; height: 22px; padding: 0 7px; border-radius: 4px; border: 1px solid; font-size: 12px; line-height: 20px; white-space: nowrap; }
+  .tag.green { color: #389e0d; background: #f6ffed; border-color: #b7eb8f; }
+  .tag.blue { color: #0958d9; background: #e6f4ff; border-color: #91caff; }
+  .tag.gold { color: #d48806; background: #fffbe6; border-color: #ffe58f; }
+  .tag.orange { color: #d46b08; background: #fff7e6; border-color: #ffd591; }
+  .ph-actions { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 32px; padding: 0 15px; border-radius: 6px; border: 1px solid var(--border); background: #fff; color: var(--text); font-size: 14px; white-space: nowrap; transition: transform .15s, box-shadow .2s, background .2s, border-color .2s, color .2s; }
+  .btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; box-shadow: 0 2px 0 rgba(194, 65, 12, .1); }
+  .btn.sq { width: 32px; padding: 0; }
+  .btn.ghost { border-color: transparent; }
+  .btn.sm { height: 24px; padding: 0 7px; gap: 6px; }
+  .btn.hover { border-color: var(--primary); color: var(--primary); }
+  .btn.primary.hover { background: #cf602d; color: #fff; }
+  .btn.press { transform: scale(.96); }
+  .spin { width: 13px; height: 13px; border-radius: 50%; border: 2px solid rgba(0, 0, 0, .15); border-top-color: var(--primary); animation: spin .7s linear infinite; }
+
+  .tabs { position: relative; display: flex; gap: 32px; margin-top: 4px; }
+  .tabs span { padding: 12px 0; color: var(--text); transition: color .3s; white-space: nowrap; }
+  .tabs span.on { color: var(--primary); }
+  .tabs span.hover { color: #cf602d; }
+  .tabs b { font-weight: inherit; }
+  .ink { position: absolute; bottom: 0; left: 0; height: 2px; background: var(--primary); transition: transform .3s cubic-bezier(.645, .045, .355, 1), width .3s cubic-bezier(.645, .045, .355, 1); }
+
+  .body { position: relative; flex: 1; min-height: 0; overflow: hidden; background: var(--bg); }
+  .body::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 48px; background: linear-gradient(rgba(246, 247, 249, 0), var(--bg)); pointer-events: none; }
+  .panel { position: absolute; inset: 0; padding: 24px 32px; opacity: 0; visibility: hidden; transition: opacity .3s ease, visibility 0s .3s; }
+  .panel.on { opacity: 1; visibility: visible; transition: opacity .3s ease; }
+
+  .card { background: var(--surface); border: 1px solid var(--split); border-radius: 8px; }
+  .card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 38px; padding: 0 12px; border-bottom: 1px solid var(--split); font-weight: 600; }
+  .card-head .t { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .card-head .t svg { color: var(--primary); }
+
+  /* Обзор */
+  .stats { display: grid; gap: 12px; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .stat { padding: 12px 14px; min-width: 0; overflow: hidden; container-type: inline-size; }
+  .stat span { display: flex; align-items: center; gap: 4px; margin-bottom: 2px; font-size: 13px; color: var(--text-2); }
+  .stat b { display: block; font-size: clamp(12px, 10.4cqw, 18px); font-weight: 400; line-height: 1.4; font-variant-numeric: tabular-nums; white-space: nowrap; transition: color .4s; }
+  .stat b.tick { color: var(--primary); }
+  .stat b small { font-size: inherit; margin-left: 4px; }
+  .chart-card { margin-top: 16px; }
+  .chart { position: relative; height: 236px; margin: 12px 12px 8px 40px; }
+  .grid-line { position: absolute; left: 0; right: 0; height: 1px; background: rgba(75, 85, 99, .14); }
+  .grid-line span { position: absolute; right: calc(100% + 8px); top: -9px; font-size: 12px; color: var(--text-2); }
+  .cols { position: absolute; left: 0; right: 0; top: 0; bottom: 22px; display: flex; align-items: flex-end; }
+  .col { position: relative; flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; }
+  .col i { width: 62%; height: var(--h); background: var(--chart); transition: height .5s cubic-bezier(.2, .8, .2, 1); }
+  .col b { margin-bottom: 2px; font-size: 12px; font-weight: 400; color: rgba(0, 0, 0, .65); font-variant-numeric: tabular-nums; }
+  .col em { position: absolute; bottom: -22px; font-size: 12px; font-style: normal; color: var(--text-2); }
+  .after-chart { display: flex; gap: 8px; margin-top: 16px; }
+
+  /* Ответы */
+  .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .seg { display: inline-flex; padding: 2px; border-radius: 8px; border: 1px solid var(--border); background: color-mix(in srgb, var(--text) 10%, #fff); }
+  .seg span { display: flex; align-items: center; height: 28px; padding: 0 11px; border-radius: 6px; white-space: nowrap; }
+  .seg span.on { background: #fff; box-shadow: 0 1px 2px color-mix(in srgb, var(--text) 18%, transparent); }
+  .seg small { margin-left: 6px; font-size: 12px; color: var(--text-2); }
+  .tools { display: flex; gap: 8px; }
+  .select { display: inline-flex; align-items: center; justify-content: space-between; gap: 18px; height: 32px; min-width: 160px; padding: 0 11px; border-radius: 6px; border: 1px solid var(--border); background: #fff; }
+  .select svg { color: #9aa1aa; }
+  .note { display: flex; align-items: flex-start; gap: 10px; margin: 16px 0 0; padding: 10px 14px; border-radius: 10px; font-size: 13px; color: var(--text-2); background: color-mix(in srgb, var(--text) 5%, #fff); }
+  .note svg { margin-top: 3px; }
+  .note strong { color: var(--text); }
+  .table { margin-top: 16px; border-radius: 8px; overflow: hidden; background: #fff; border: 1px solid var(--split); }
+  .tr { display: grid; grid-template-columns: 190px minmax(0, 1fr) 160px 130px 40px; align-items: center; border-bottom: 1px solid var(--split); transition: background .2s; }
+  .tr > div { padding: 14px 16px; min-width: 0; }
+  .th { background: #fafafa; font-weight: 500; }
+  .th > div { padding: 12px 16px; }
+  .row-wrap { display: grid; grid-template-rows: 1fr; transition: grid-template-rows .45s cubic-bezier(.2, .8, .2, 1), opacity .4s; }
+  .row-wrap > div { min-height: 0; overflow: hidden; }
+  .row-wrap.new { grid-template-rows: 0fr; opacity: 0; }
+  .tr.hover { background: #fafafa; }
+  .tr.flagged > div:first-child { box-shadow: inset 3px 0 0 var(--danger); }
+  .tr.fresh { background: color-mix(in srgb, var(--primary) 6%, #fff); }
+  .who { display: flex; align-items: center; gap: 12px; }
+  .num { --st: var(--primary); width: 40px; height: 40px; flex: none; display: grid; place-items: center; border-radius: 50%; font-size: 14px; font-weight: 600; color: var(--st); background: color-mix(in srgb, var(--st) 14%, #fff); font-variant-numeric: tabular-nums; }
+  .flagged .num { --st: var(--danger); }
+  .who strong { font-weight: 600; }
+  .meta { font-size: 12px; color: var(--text-2); }
+  .ans { display: flex; flex-direction: column; gap: 8px; }
+  .ans p { margin: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+  .chips li { display: inline-flex; align-items: baseline; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; background: color-mix(in srgb, var(--text) 6%, #fff); }
+  .chips span { color: var(--text-2); }
+  .chips strong { font-weight: 500; }
+  .chev { color: var(--text-2); }
+  .cards { display: none; flex-direction: column; margin-top: 12px; }
+  .rcard { position: relative; display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; padding: 16px 20px; border-radius: 14px; border: 1px solid #d9d9d9; background: #fff; transition: border-color .2s, box-shadow .2s; }
+  .rcard.hover { border-color: #9ca3af; box-shadow: 0 2px 10px color-mix(in srgb, var(--text) 8%, transparent); }
+  .rcard.flagged::before { content: ''; position: absolute; top: 14px; bottom: 14px; left: 0; width: 3px; border-radius: 0 3px 3px 0; background: var(--danger); }
+  .rcard header { display: flex; align-items: center; gap: 12px; }
+  .rcard header div { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .rcard header div span { font-size: 12px; color: var(--text-2); }
+  .rcard blockquote { margin: 0; padding-left: 14px; border-left: 2px solid #d9d9d9; }
+  .rcard blockquote p { margin: 0; font-size: 15px; }
+  .rcard blockquote cite { display: block; margin-top: 4px; font-size: 12px; font-style: normal; color: var(--text-2); }
+  .rcard footer { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-2); }
+
+  /* Аналитика */
+  .analytics { display: flex; flex-direction: column; gap: 24px; }
+  .basis { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding: 14px 20px; border-radius: 12px; border: 1px solid #d9d9d9; background: #fff; }
+  .basis small { display: block; margin-top: 2px; font-size: 12px; color: var(--text-2); }
+  .basis label { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .switch { position: relative; width: 28px; height: 16px; flex: none; border-radius: 8px; background: var(--primary); }
+  .switch::after { content: ''; position: absolute; top: 2px; right: 2px; width: 12px; height: 12px; border-radius: 50%; background: #fff; box-shadow: 0 2px 4px rgba(0, 35, 11, .2); }
+  .analytics .card { border-radius: 12px; }
+  .summary-body { padding: 12px; min-height: 46px; }
+  .summary-body > span { color: var(--text-2); }
+  .summary-body ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+  .summary-body li { line-height: 1.5; animation: rise .35s ease both; }
+  .evidence { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 2px; font-size: 12px; }
+  .evidence span { color: var(--text-2); }
+  .evidence a { color: var(--primary); }
+  .sum-meta { margin-top: 10px; font-size: 12px; color: var(--text-2); animation: rise .35s ease both; }
+  .sec-title { margin: 0 0 12px; font-size: 16px; font-weight: 600; }
+  .metric { width: 300px; padding: 12px; }
+  .metric > span { color: var(--text-2); }
+  .metric > b { display: block; font-size: 24px; font-weight: 400; }
+  .metric > b small { font-size: 12px; margin-left: 4px; }
+  .metric .meta { margin-top: 4px; }
+  .metric dl { display: flex; flex-direction: column; gap: 2px; margin: 8px 0 0; font-size: 13px; }
+  .metric dl div { display: flex; justify-content: space-between; }
+  .metric dd { margin: 0; font-weight: 600; }
+
+  /* ---------- Панель «Спросить ИИ» (Drawer) ---------- */
+  .mask { position: absolute; inset: 0; z-index: 10; background: rgba(0, 0, 0, .45); opacity: 0; visibility: hidden; transition: opacity .3s, visibility 0s .3s; }
+  .mask.on { opacity: 1; visibility: visible; transition: opacity .3s; }
+  .drawer { position: absolute; top: 0; right: 0; bottom: 0; z-index: 11; width: 460px; display: flex; flex-direction: column; background: #fff; box-shadow: -6px 0 16px rgba(0, 0, 0, .08), -3px 0 6px -4px rgba(0, 0, 0, .12), -9px 0 28px 8px rgba(0, 0, 0, .05); transform: translateX(100%); transition: transform .3s cubic-bezier(.23, 1, .32, 1); }
+  .drawer.on { transform: none; }
+  .dr-head { flex: none; display: flex; align-items: center; gap: 12px; padding: 16px 24px; border-bottom: 1px solid var(--split); font-size: 16px; font-weight: 600; }
+  .dr-head svg.x { color: var(--text-2); }
+  .dr-head .t { display: flex; align-items: center; gap: 8px; }
+  .dr-head .t svg { color: var(--primary); }
+  .dr-list { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px; padding: 16px; overflow: hidden; }
+  .intro { color: var(--text-2); font-size: 13px; line-height: 1.5; }
+  .intro p { margin: 0 0 14px; }
+  .intro .sugg { display: flex; flex-direction: column; gap: 8px; }
+  .intro button { text-align: left; padding: 8px 12px; border: 1px solid #d9d9d9; border-radius: 8px; background: var(--bg); color: var(--text); font: inherit; font-size: 13px; transition: border-color .2s, color .2s; }
+  .intro button.hover { border-color: var(--primary); color: var(--primary); }
+  .msg { display: flex; flex-direction: column; gap: 8px; animation: rise .3s ease both; }
+  .msg.user { align-self: flex-end; max-width: 88%; }
+  .bubble { padding: 8px 12px; border-radius: 12px; font-size: 13px; line-height: 1.5; background: var(--bg); }
+  .user .bubble { background: var(--primary); color: #fff; }
+  .loading { align-self: flex-start; }
+  .loading .bubble { color: var(--text-2); }
+  .bubble p { margin: 0 0 6px; animation: rise .3s ease both; }
+  .bubble p:last-child { margin-bottom: 0; }
+  .bubble .tag { margin-right: 6px; height: 20px; line-height: 18px; }
+  blockquote.q { margin: 0; padding: 8px 12px; border-left: 3px solid var(--primary); border-radius: 4px; background: var(--bg); font-size: 13px; line-height: 1.5; animation: rise .3s ease both; }
+  blockquote.q div { margin-top: 4px; font-size: 12px; color: var(--text-2); }
+  .dr-foot { flex: none; display: flex; align-items: flex-end; gap: 8px; padding: 12px; border-top: 1px solid var(--split); }
+  .textarea { flex: 1; min-height: 32px; padding: 4px 11px; border-radius: 6px; border: 1px solid var(--border); color: #9aa1aa; line-height: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dr-foot .btn { opacity: .5; }
+
+  /* ---------- Курсор ---------- */
+  .cursor { position: absolute; left: 0; top: 0; z-index: 30; width: 22px; height: 22px; overflow: visible; opacity: 0; transform: translate(var(--x, 1100px), var(--y, 700px)); transition: transform .85s cubic-bezier(.45, .05, .25, 1), opacity .3s; pointer-events: none; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .25)); }
+  .cursor.on { opacity: 1; }
+  .cursor circle { fill: rgba(194, 65, 12, .35); opacity: 0; transform-origin: 4px 2px; }
+  .cursor.click circle { animation: ripple .45s ease-out; }
+
+  /* ---------- Мобильная раскладка сервиса ---------- */
+  .compact .stage { width: 390px; height: 844px; }
+  .compact .win { inset: 10px 10px 18px; }
+  .compact .url { flex-basis: 260px; }
+  .compact .brand { padding: 4px; }
+  .compact .brand a { padding: 0 8px; }
+  .compact .brand span, .compact .crumbs, .compact .profile div { display: none; }
+  .compact .hdr-main { padding: 0 12px; justify-content: flex-end; }
+  .compact .profile { width: auto; padding: 4px 8px; }
+  .compact .ph { padding-top: 12px; }
+  .compact .wrap { padding: 0 12px; }
+  .compact .ph-title h1 { font-size: 20px; }
+  .compact .ph-actions { margin-left: 0; width: 100%; }
+  .compact .tabs { gap: 22px; margin-top: 2px; }
+  .compact .panel { padding: 16px 12px; }
+  .compact .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .compact .stat b { font-size: 16px; }
+  .compact .chart { height: 168px; margin-left: 32px; }
+  .compact .col b, .compact .col em { font-size: 10px; }
+  .compact .col:nth-child(even) em { display: none; }
+  .compact .seg { display: flex; width: 100%; }
+  .compact .seg span { flex: 1; flex-direction: column; justify-content: center; height: 44px; padding: 0 4px; font-size: 13px; line-height: 1.3; text-align: center; }
+  .compact .seg small { margin-left: 0; }
+  .compact .tools { width: 100%; }
+  .compact .tools .select { flex: 1; }
+  .compact .table { display: none; }
+  .compact .cards { display: flex; }
+  .compact .basis { padding: 12px 14px; }
+  .compact .btn.sm { font-size: 13px; }
+  .compact .metric { width: 100%; }
+  .compact .drawer { width: 100%; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @keyframes ripple { 0% { opacity: 1; transform: scale(.3); } 100% { opacity: 0; transform: scale(1.6); } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="stage" id="stage" role="img" aria-label="Анимация интерфейса СВОД Опросы: на странице опроса приходят ответы, в таблице виден ответ с замечаниями, ИИ формирует резюме и отвечает на вопрос о критике с цитатами">
+  <div class="win" aria-hidden="true">
+    <div class="bar">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <div class="url"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>surveys.svodservice.ru/surveys</div>
+    </div>
+
+    <div class="app">
+      <header class="hdr">
+        <div class="brand"><a><img src="demo/svod-logo.svg" alt=""><span>Опросы</span></a></div>
+        <div class="hdr-main">
+          <div class="crumbs">Опросы <span>/</span> Продукт <span>/</span> <b>Отзывы о сервисе</b></div>
+          <span class="icon-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg></span>
+        </div>
+        <div class="profile"><span class="ava">А</span><div><span>Анна Смирнова</span><small>anna@company.ru</small></div></div>
+      </header>
+
+      <div class="page">
+        <div class="ph">
+          <div class="wrap">
+            <div class="ph-row">
+              <span class="btn sq ghost"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></span>
+              <div class="ph-title"><h1>Отзывы о сервисе</h1><span class="tag green">Открыт</span></div>
+              <div class="ph-actions">
+                <span class="btn primary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Поделиться</span>
+                <span class="btn" id="askBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Спросить ИИ</span>
+                <span class="btn sq"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></span>
+              </div>
+            </div>
+          </div>
+          <div class="wrap">
+            <div class="tabs" id="tabs">
+              <span class="on" data-tab="overview">Обзор</span>
+              <span data-tab="form">Вопросы</span>
+              <span data-tab="responses">Ответы (<b id="tabCount">143</b>)</span>
+              <span data-tab="analytics">Аналитика</span>
+              <i class="ink" id="ink"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="body">
+          <!-- Обзор -->
+          <section class="panel on" id="p-overview">
+            <div class="stats">
+              <div class="card stat"><span>Всего отправок</span><b id="sTotal">143</b></div>
+              <div class="card stat"><span>Полнота ответов <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-5M12 8h.01" stroke-linecap="round"/></svg></span><b>94<small>%</small></b></div>
+              <div class="card stat"><span>Среднее время</span><b>3 мин 42 с</b></div>
+              <div class="card stat"><span>Последний ответ</span><b id="sLast">03.11.2026, 14:27</b></div>
+              <div class="card stat"><span>Первый ответ</span><b>21.10.2026, 09:14</b></div>
+              <div class="card stat"><span>Вопросов в форме</span><b>12</b></div>
+            </div>
+            <div class="card chart-card">
+              <div class="card-head">Динамика ответов</div>
+              <div class="chart" id="chart"></div>
+            </div>
+            <div class="after-chart"><span class="btn primary">Смотреть ответы</span><span class="btn">Открыть аналитику</span></div>
+          </section>
+
+          <!-- Ответы -->
+          <section class="panel" id="p-responses">
+            <div class="toolbar">
+              <div class="seg"><span class="on">Все<small id="segAll">143</small></span><span>С замечаниями<small id="segFlag">5</small></span><span>Без замечаний<small id="segClean">138</small></span></div>
+              <div class="tools">
+                <span class="select">Сначала новые<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></span>
+                <span class="btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Скачать CSV</span>
+              </div>
+            </div>
+            <p class="note"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-5M12 8h.01" stroke-linecap="round"/></svg><span>Ответов с замечаниями: <strong id="noteFlag">5</strong>. Серьёзные не попадают в аналитику, но остаются здесь — откройте ответ, чтобы увидеть причину.</span></p>
+            <div class="table">
+              <div class="tr th"><div>Ответ</div><div>Что ответил</div><div>Получен</div><div>Заполнение</div><div></div></div>
+              <div id="rows"></div>
+            </div>
+            <div class="cards" id="cards"></div>
+          </section>
+
+          <!-- Аналитика -->
+          <section class="panel" id="p-analytics">
+            <div class="analytics">
+              <div class="basis">
+                <div>В расчёт включено ответов: <strong>142</strong> из 148<small>Исключено по замечаниям качества: 6</small></div>
+                <label>Исключать ответы с серьёзными замечаниями <span class="switch"></span></label>
+              </div>
+              <div class="card">
+                <div class="card-head">
+                  <span class="t"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M9 13v1M15 13v1M9.5 17h5"/><circle cx="12" cy="3" r="1"/></svg>ИИ-резюме</span>
+                  <span class="btn sm" id="sumBtn"></span>
+                </div>
+                <div class="summary-body" id="sumBody"></div>
+              </div>
+              <div>
+                <h3 class="sec-title">Метрики</h3>
+                <div class="card metric">
+                  <span>Индекс лояльности NPS</span>
+                  <b>31<small>пункт</small></b>
+                  <div class="meta">Ответов в расчёте: 142</div>
+                  <dl><div><dt>Промоутеры</dt><dd>52 %</dd></div><div><dt>Нейтралы</dt><dd>27 %</dd></div><div><dt>Критики</dt><dd>21 %</dd></div></dl>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div class="mask" id="mask"></div>
+      <aside class="drawer" id="drawer">
+        <div class="dr-head">
+          <svg class="x" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          <span class="t"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M9 13v1M15 13v1M9.5 17h5"/><circle cx="12" cy="3" r="1"/></svg>Спросить ИИ о результатах</span>
+        </div>
+        <div class="dr-list" id="drList"></div>
+        <div class="dr-foot">
+          <span class="textarea">Например: почему студенты с 3 курса оценивают хуже?</span>
+          <span class="btn primary sq"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg></span>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <svg class="cursor" id="cursor" viewBox="0 0 22 22"><circle cx="4" cy="2" r="11"/><path d="M4 2v17l4.6-4.4 3.1 6.8 2.9-1.3-3.1-6.7H18z" fill="#111" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/></svg>
+</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const stage = $('stage');
+  const cursor = $('cursor');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Ответы: старые уже есть, новые приходят во время анимации (№146 — с замечаниями качества)
+  const OLD = [
+    { n: 143, at: '14:27', rel: '4 минуты назад', dur: '2 мин 41 с', text: 'Удобный конструктор, всё понятно с первого раза', nps: 9, plan: 'Бесплатный' },
+    { n: 142, at: '14:19', rel: '12 минут назад', dur: '3 мин 12 с', text: 'Отчёты строятся мгновенно, спасибо', nps: 10, plan: 'Команда' },
+    { n: 141, at: '14:02', rel: '29 минут назад', dur: '4 мин 3 с', text: 'Не хватает экспорта графиков в Excel', nps: 7, plan: 'Бизнес' },
+  ];
+  const NEW = [
+    { n: 144, at: '14:28', dur: '5 мин 20 с', text: 'Настройка домена заняла полдня', nps: 6, plan: 'Бизнес' },
+    { n: 145, at: '14:29', dur: '3 мин 5 с', text: 'С телефона анкета грузится медленно', nps: 5, plan: 'Команда' },
+    { n: 146, at: '14:30', dur: '14 с', text: '3 3 3 3 3 3 3 3', nps: 3, plan: 'Бесплатный', flagged: true },
+    { n: 147, at: '14:30', dur: '4 мин 10 с', text: 'Нравятся шаблоны по ГОСТ для диплома', nps: 9, plan: 'Бесплатный' },
+    { n: 148, at: '14:31', dur: '2 мин 58 с', text: 'Хочу выгрузку графиков в Excel', nps: 7, plan: 'Команда' },
+  ];
+  const DAYS = ['21.10', '22.10', '23.10', '24.10', '25.10', '26.10', '27.10', '28.10', '29.10', '30.10', '31.10', '01.11', '02.11', '03.11'];
+  const COUNTS = [8, 11, 9, 12, 10, 13, 11, 15, 12, 13, 10, 12, 4, 3];
+  const MAX = 16;
+  const QUESTION = 'Что чаще всего критикуют в открытых ответах? Приведи цитаты';
+  // Подсказки вкладки «Аналитика» — те же, что в сервисе
+  const SUGGESTIONS = [
+    'Какие главные выводы по результатам опроса?',
+    'Чем различаются ответы разных групп респондентов?',
+    QUESTION,
+  ];
+  const REPLY = [
+    ['blue', 'Факты', 'Из 142 ответов 58 упоминают сложную настройку домена, 40 — медленную загрузку анкеты с телефона.'],
+    ['gold', 'Интерпретация', 'Основное трение возникает в первые минуты работы, ещё до первого опубликованного опроса.'],
+    ['green', 'Что можно сделать', 'Добавить пошаговую настройку домена и ускорить мобильную версию анкеты.'],
+  ];
+  const QUOTES = [
+    ['Долго не мог понять, где привязать домен, в справке устаревшие скриншоты', 'Что вам не понравилось?'],
+    ['С телефона открывается по 7 секунд, половина коллег закрыла вкладку', 'Что вам не понравилось?'],
+  ];
+  const SUMMARY = [
+    ['Три темы дают 88% жалоб: сложная настройка домена (41%), медленная загрузка с телефона (28%) и нет экспорта графиков в Excel (19%).', ['Что вам не понравилось?']],
+    ['NPS — 31 пункт: промоутеров 52%, критиков 21%; критики чаще всего пишут о скорости мобильной версии.', ['Готовность рекомендовать']],
+    ['Больше всего хвалят шаблоны по ГОСТ и скорость построения отчётов.', ['Что вам понравилось?']],
+  ];
+
+  const ICON = {
+    robot: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M9 13v1M15 13v1M9.5 17h5"/><circle cx="12" cy="3" r="1"/></svg>',
+    reload: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>',
+    chev: '<svg class="chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>',
+    arrow: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+  };
+
+  // Масштаб и раскладка: окно вписывается в ширину iframe, нужную высоту сообщаем лендингу
+  let scale = 1;
+  let compact = false;
+  function fit() {
+    const want = innerWidth < 640;
+    const changed = want !== compact;
+    compact = want;
+    document.documentElement.classList.toggle('compact', compact);
+    const W = compact ? 390 : 1200;
+    const H = compact ? 844 : 760;
+    scale = innerWidth / W;
+    stage.style.transform = `scale(${scale})`;
+    const height = Math.round(H * scale);
+    document.body.style.height = `${height}px`;
+    if (parent !== window) parent.postMessage({ type: 'svod-workspace-demo', height }, '*');
+    return changed;
+  }
+
+  // Каждый прогон получает свой номер, ожидания старого прогона тихо обрываются
+  let run = 0;
+  const wait = (ms, id) => new Promise((resolve, reject) => setTimeout(() => (id === run ? resolve() : reject('stale')), ms));
+  const el = (tag, cls, html) => { const n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; };
+
+  // ---------- Отрисовка ----------
+  function drawChart() {
+    $('chart').innerHTML = [0, 4, 8, 12, 16].map((v) => `<div class="grid-line" style="bottom:calc(22px + (100% - 22px) * ${v / MAX})"><span>${v}</span></div>`).join('') +
+      '<div class="cols">' + COUNTS.map((c, i) => `<div class="col"><b>${c}</b><i style="--h:calc((100% - 18px) * ${c / MAX})"></i><em>${DAYS[i]}</em></div>`).join('') + '</div>';
+  }
+  function setToday(count) {
+    const col = $('chart').querySelector('.col:last-child');
+    col.querySelector('b').textContent = count;
+    col.querySelector('i').style.setProperty('--h', `calc((100% - 18px) * ${count / MAX})`);
+  }
+  const chips = (r) => `<ul class="chips"><li><span>Готовность рекомендовать</span><strong>${r.nps}</strong></li><li><span>Тариф</span><strong>${r.plan}</strong></li></ul>`;
+  function rowNode(r, fresh) {
+    const w = el('div', fresh ? 'row-wrap new' : 'row-wrap');
+    w.innerHTML = `<div><div class="tr${r.flagged ? ' flagged' : ''}${fresh ? ' fresh' : ''}">
+      <div class="who"><span class="num">${r.n}</span><div><strong>№${r.n}</strong><div class="meta">${r.rel || 'только что'}</div></div></div>
+      <div class="ans"><p>«${r.text}»</p>${chips(r)}</div>
+      <div>03.11.2026, ${r.at}</div><div>${r.dur}</div><div>${ICON.chev}</div>
+    </div></div>`;
+    return w;
+  }
+  function cardNode(r, fresh) {
+    const w = el('div', fresh ? 'row-wrap new' : 'row-wrap');
+    w.innerHTML = `<div><article class="rcard${r.flagged ? ' flagged' : ''}">
+      <header><span class="num">${r.n}</span><div><strong>Ответ №${r.n}</strong><span>${r.rel || 'только что'} · заполнение ${r.dur}</span></div>${r.flagged ? '<span class="tag orange">Есть замечания</span>' : ''}</header>
+      <blockquote><p>${r.text}</p><cite>Что вам не понравилось?</cite></blockquote>
+      ${chips(r)}
+      <footer>Открыть ответ ${ICON.arrow}</footer>
+    </article></div>`;
+    return w;
+  }
+  function setSummaryButton(state) {
+    const b = $('sumBtn');
+    b.classList.remove('hover', 'press');
+    b.innerHTML = state === 'loading' ? '<span class="spin"></span>Сформировать ИИ-резюме' : state === 'done' ? `${ICON.reload}Обновить` : `${ICON.robot}Сформировать ИИ-резюме`;
+  }
+  function renderSummary() {
+    $('sumBody').innerHTML = '<ul>' + SUMMARY.map(([text, refs], i) =>
+      `<li style="animation-delay:${i * 180}ms">${text}<div class="evidence"><span>Данные:</span>${refs.map((r) => `<a>${r}</a>`).join('')}</div></li>`).join('') + '</ul>' +
+      `<div class="sum-meta" style="animation-delay:${SUMMARY.length * 180}ms">Сформировано 03.11.2026, 14:33 по 142 ответам. Резюме написано ИИ по агрегированным данным и не заменяет их — проверяйте выводы по графикам и таблицам ниже.</div>`;
+  }
+  function renderIntro() {
+    $('drList').innerHTML = `<div class="intro"><p>Задайте вопрос на естественном языке, например «Почему студенты 3 курса оценивают сервис хуже, чем 1 курса?». ИИ сопоставит группы, посчитает различия и найдёт цитаты в открытых ответах именно этой группы.</p>
+      <div class="sugg">${SUGGESTIONS.map((s) => `<button>${s}</button>`).join('')}</div></div>`;
+  }
+  function setTab(name) {
+    for (const t of $('tabs').querySelectorAll('span')) { t.classList.toggle('on', t.dataset.tab === name); t.classList.remove('hover'); }
+    for (const p of document.querySelectorAll('.panel')) p.classList.toggle('on', p.id === `p-${name}`);
+    moveInk();
+  }
+  function moveInk() {
+    const on = $('tabs').querySelector('span.on');
+    const ink = $('ink');
+    ink.style.width = `${on.offsetWidth}px`;
+    ink.style.transform = `translateX(${on.offsetLeft}px)`;
+  }
+
+  // ---------- Курсор ----------
+  function at(node, ax = 0.5, ay = 0.5) {
+    const s = stage.getBoundingClientRect();
+    const r = node.getBoundingClientRect();
+    return { x: (r.left - s.left + r.width * ax) / scale, y: (r.top - s.top + r.height * ay) / scale };
+  }
+  let pos = { x: 0, y: 0 };
+  function point(p) { pos = p; cursor.style.setProperty('--x', `${p.x - 4}px`); cursor.style.setProperty('--y', `${p.y - 2}px`); }
+  async function moveTo(node, id, ax, ay) { point(at(node, ax, ay)); await wait(900, id); }
+  async function click(node, id) {
+    node.classList.add('hover');
+    await wait(180, id);
+    cursor.classList.remove('click'); void cursor.getBoundingClientRect(); cursor.classList.add('click');
+    node.classList.add('press');
+    await wait(160, id);
+    node.classList.remove('press', 'hover');
+  }
+
+  // ---------- Сцена ----------
+  let total = 143;
+  let flagged = 5;
+  function counters() {
+    $('tabCount').textContent = total;
+    $('sTotal').textContent = total;
+    $('segAll').textContent = total;
+    $('segFlag').textContent = flagged;
+    $('noteFlag').textContent = flagged;
+    $('segClean').textContent = total - flagged;
+    moveInk();
+  }
+  function reset() {
+    stage.classList.add('instant');
+    total = 143; flagged = 5;
+    drawChart();
+    $('rows').innerHTML = ''; $('cards').innerHTML = '';
+    for (const r of OLD) { $('rows').append(rowNode(r)); $('cards').append(cardNode(r)); }
+    $('sLast').textContent = '03.11.2026, 14:27';
+    setSummaryButton('idle');
+    $('sumBody').innerHTML = '<span>Нажмите «Сформировать ИИ-резюме», чтобы получить 3–5 главных выводов по результатам.</span>';
+    renderIntro();
+    $('mask').classList.remove('on'); $('drawer').classList.remove('on');
+    cursor.classList.remove('on', 'click');
+    point(compact ? { x: 360, y: 820 } : { x: 1160, y: 740 });
+    setTab('overview');
+    counters();
+    void stage.offsetWidth;
+    stage.classList.remove('instant');
+  }
+
+  async function arrive(r, id) {
+    total = r.n;
+    if (r.flagged) flagged += 1;
+    const last = $('sLast');
+    last.textContent = `03.11.2026, ${r.at}`;
+    last.classList.add('tick'); $('sTotal').classList.add('tick');
+    counters();
+    setToday(COUNTS[COUNTS.length - 1] + (r.n - 143));
+    for (const [list, make] of [[$('rows'), rowNode], [$('cards'), cardNode]]) {
+      for (const old of list.querySelectorAll('.fresh')) old.classList.remove('fresh');
+      const node = make(r, true);
+      list.prepend(node);
+      void node.offsetWidth;
+      node.classList.remove('new');
+      while (list.children.length > 6) list.lastElementChild.remove();
+    }
+    await wait(350, id);
+    last.classList.remove('tick'); $('sTotal').classList.remove('tick');
+  }
+
+  async function play(id) {
+    reset();
+    await wait(700, id);
+    // 1. «Обзор»: ответы приходят без лимита, растут счётчики и сегодняшний столбец
+    for (const r of NEW) { await arrive(r, id); await wait(500, id); }
+
+    // 2. «Ответы»: свежие ответы сверху, ответ бота отмечен красной полосой
+    cursor.classList.add('on');
+    const tabs = $('tabs');
+    const tResp = tabs.querySelector('[data-tab="responses"]');
+    await moveTo(tResp, id, 0.5, 0.7);
+    await click(tResp, id);
+    setTab('responses');
+    await wait(900, id);
+    const flaggedRow = document.querySelector(compact ? '#cards .rcard.flagged' : '#rows .tr.flagged');
+    if (flaggedRow) {
+      await moveTo(flaggedRow, id, compact ? 0.7 : 0.45, 0.5);
+      flaggedRow.classList.add('hover');
+      await wait(1300, id);
+      flaggedRow.classList.remove('hover');
+    }
+
+    // 3. «Аналитика»: ИИ-резюме по ответам без замечаний
+    const tAn = tabs.querySelector('[data-tab="analytics"]');
+    await moveTo(tAn, id, 0.5, 0.7);
+    await click(tAn, id);
+    setTab('analytics');
+    await wait(700, id);
+    const sumBtn = $('sumBtn');
+    await moveTo(sumBtn, id, 0.6, 0.6);
+    await click(sumBtn, id);
+    setSummaryButton('loading');
+    $('sumBody').innerHTML = '';
+    await wait(1400, id);
+    setSummaryButton('done');
+    renderSummary();
+    await wait(1900, id);
+
+    // 4. «Спросить ИИ»: вопрос из подсказок, ответ с фактами и цитатами
+    const ask = $('askBtn');
+    await moveTo(ask, id, 0.55, 0.6);
+    await click(ask, id);
+    $('mask').classList.add('on'); $('drawer').classList.add('on');
+    await wait(600, id);
+    const sugg = $('drList').querySelectorAll('.intro button')[2];
+    await moveTo(sugg, id, 0.5, 0.6);
+    await click(sugg, id);
+    const list = $('drList');
+    list.innerHTML = '';
+    list.append(el('div', 'msg user', `<div class="bubble">${QUESTION}</div>`));
+    await wait(350, id);
+    const loading = el('div', 'msg loading', '<div class="bubble">Анализирую ответы…</div>');
+    list.append(loading);
+    point({ x: pos.x, y: pos.y + 140 });
+    await wait(1500, id);
+    loading.remove();
+    const reply = el('div', 'msg', '<div class="bubble"></div>');
+    list.append(reply);
+    const bubble = reply.querySelector('.bubble');
+    for (const [color, label, text] of REPLY) {
+      bubble.append(el('p', '', `<span class="tag ${color}">${label}</span>${text}`));
+      await wait(450, id);
+    }
+    for (const [text, q] of QUOTES) {
+      reply.append(el('blockquote', 'q', `«${text}»<div>— ответ на вопрос «${q}»</div>`));
+      await wait(400, id);
+    }
+    cursor.classList.remove('on');
+    await wait(3600, id);
+  }
+
+  // Для тех, кто отключил анимацию: финальный кадр без движения
+  function finalFrame() {
+    reset();
+    for (const r of NEW) { total = r.n; if (r.flagged) flagged += 1; $('rows').prepend(rowNode(r)); $('cards').prepend(cardNode(r)); }
+    counters();
+    setToday(8);
+    setTab('analytics');
+    setSummaryButton('done');
+    renderSummary();
+    $('mask').classList.add('on'); $('drawer').classList.add('on');
+    $('drList').innerHTML = `<div class="msg user"><div class="bubble">${QUESTION}</div></div>
+      <div class="msg"><div class="bubble">${REPLY.map(([c, l, t]) => `<p><span class="tag ${c}">${l}</span>${t}</p>`).join('')}</div>
+      ${QUOTES.map(([t, q]) => `<blockquote class="q">«${t}»<div>— ответ на вопрос «${q}»</div></blockquote>`).join('')}</div>`;
+  }
+
+  let visible = true;
+  let wake = null;
+  const whenVisible = () => (visible ? Promise.resolve() : new Promise((r) => { wake = r; }));
+  new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible && wake) { wake(); wake = null; } }).observe(document.body);
+
+  async function loop() {
+    const id = ++run;
+    try {
+      for (;;) {
+        await whenVisible();
+        await play(id);
+        stage.classList.add('fade');
+        await wait(650, id);
+        stage.classList.remove('fade');
+      }
+    } catch (e) {
+      if (e !== 'stale') throw e;
+    }
+  }
+
+  fit();
+  addEventListener('resize', () => {
+    const changed = fit();
+    if (reduce) { finalFrame(); return; }
+    if (changed) loop();
+    else moveInk();
+  });
+  document.fonts?.ready.then(moveInk);
+  if (reduce) finalFrame();
+  else loop();
+})();
+</script>
+</body>
+</html>

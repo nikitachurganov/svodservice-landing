@@ -12,6 +12,7 @@ import {
   type SurveyDraft,
   type SurveyQuestion,
 } from '../lib/surveyApi';
+import { GOALS, reachGoal } from '../lib/analytics';
 
 interface AiDemoModalProps {
   isOpen: boolean;
@@ -88,11 +89,13 @@ export const AiDemoModal: React.FC<AiDemoModalProps> = ({ isOpen, initialPrompt,
     generateSurveyApi(initialPrompt)
       .then((data) => {
         if (!isMounted) return;
+        reachGoal(GOALS.demoGenerated, { source: data.from_service ? 'service' : 'template' });
         setSurvey(data);
         setLoading(false);
       })
       .catch((err: Error) => {
         if (!isMounted) return;
+        reachGoal(GOALS.demoError);
         setLoading(false);
         setError(err.message || 'Ошибка генерации. Попробуйте ещё раз.');
       });
@@ -104,6 +107,7 @@ export const AiDemoModal: React.FC<AiDemoModalProps> = ({ isOpen, initialPrompt,
 
   const handleProceedToService = () => {
     if (!survey) return;
+    reachGoal(GOALS.demoContinue);
     window.location.href = getContinueUrl(survey);
   };
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowUpOutlined } from '@ant-design/icons';
 import { AiDemoModal } from './AiDemoModal';
+import { GOALS, reachGoal } from '../lib/analytics';
 
 export const Hero: React.FC = () => {
   const [prompt, setPrompt] = useState('');
@@ -10,6 +11,7 @@ export const Hero: React.FC = () => {
   const handleCreate = () => {
     const text = prompt.trim();
     if (!text) return;
+    reachGoal(GOALS.demoSubmit);
     setSubmittedPrompt(text);
     setIsModalOpen(true);
   };
@@ -32,7 +34,7 @@ export const Hero: React.FC = () => {
           }}
         >
           <input
-            className="hero-form__field"
+            className="hero-form__field ym-disable-keys"
             type="text"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}

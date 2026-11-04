@@ -24,7 +24,7 @@
 }
 
 html {
-  background-color: var(--app-bg-warm);
+  background-color: var(--app-page);
   color: var(--app-ink);
   scroll-behavior: smooth;
   scroll-padding-top: calc(var(--app-header-height) + 20px);
@@ -49,7 +49,7 @@ body {
 }
 
 body {
-  background-color: var(--app-bg-warm);
+  background-color: var(--app-page);
   color: var(--app-ink);
   font-size: 15px;
   line-height: 1.6;
@@ -174,7 +174,7 @@ input:focus-visible,
   top: 0;
   z-index: 1000;
   height: var(--app-header-height);
-  background: rgba(250, 249, 247, 0.86);
+  background: rgba(255, 255, 255, 0.86);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--app-grid-line);
   display: flex;
@@ -575,177 +575,18 @@ input:focus-visible,
   padding: 0 0 96px;
 }
 
-.video-demo-wrap {
-  max-width: 1100px;
+/* The window demo lives in an iframe; the iframe reports its own height, the aspect ratio is only a fallback */
+.workspace-demo {
+  max-width: 1200px;
   margin: 0 auto;
-  border-radius: 12px;
-  transition: border-color 0.2s ease;
 }
 
-.video-demo-wrap:hover {
-  border-color: var(--app-grid-cross);
-}
-
-.video-demo-frame {
-  border-radius: 12px;
-  overflow: hidden;
-  background: #ffffff;
-  cursor: pointer;
-}
-
-.video-demo-topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px 16px;
-  background: var(--app-surface-muted);
-  border-bottom: 1px solid var(--app-grid-line);
-}
-
-.video-demo-dots {
-  display: flex;
-  gap: 6px;
-}
-
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--app-grid-line);
-}
-
-.video-demo-url-pill {
-  display: inline-flex;
-  align-items: center;
-  min-width: 0;
-  font-size: 12px;
-  color: var(--app-ink-muted);
-  background: #ffffff;
-  border: 1px solid var(--app-grid-line);
-  padding: 3px 14px;
-  border-radius: 6px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.video-demo-duration {
-  font-size: 12px;
-  color: var(--app-ink-muted);
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.video-demo-screen {
-  position: relative;
+.workspace-demo iframe {
+  display: block;
   width: 100%;
-  aspect-ratio: 16 / 9;
-  max-height: 560px;
-  background: #1f1b18;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.video-demo-bg-mockup {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  opacity: 0.14;
-  pointer-events: none;
-  padding: 24px;
-  gap: 20px;
-}
-
-.mockup-sidebar {
-  width: 220px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.mockup-line {
-  height: 12px;
-  background: #ffffff;
-  border-radius: 6px;
-}
-.mockup-line--sm { width: 50%; }
-.mockup-line--md { width: 80%; }
-.mockup-line--lg { width: 100%; }
-
-.mockup-box {
-  flex: 1;
-  background: #ffffff;
-  border-radius: 10px;
-  margin-top: 12px;
-}
-
-.mockup-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.mockup-header-bar {
-  display: flex;
-  justify-content: space-between;
-  height: 36px;
-}
-
-.mockup-title-bar {
-  width: 240px;
-  height: 24px;
-  background: #ffffff;
-  border-radius: 6px;
-}
-
-.mockup-btn-bar {
-  width: 100px;
-  height: 32px;
-  background: var(--brand-500);
-  border-radius: 6px;
-}
-
-.mockup-cards-row {
-  display: flex;
-  gap: 14px;
-  height: 100px;
-}
-
-.mockup-card,
-.mockup-chart-box {
-  flex: 1;
-  background: #ffffff;
-  border-radius: 10px;
-}
-
-.video-demo-overlay {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 24px;
-}
-
-.video-demo-play-btn {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: var(--brand-500);
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s ease;
-}
-
-.video-demo-frame:hover .video-demo-play-btn {
-  transform: scale(1.08);
+  aspect-ratio: 1200 / 760;
+  border: 0;
+  background: transparent;
 }
 
 /* ── 3. Features grid ──────────────────────────────────────────────────── */
@@ -771,15 +612,16 @@ input:focus-visible,
   grid-column: span 3;
 }
 
-.feature-cell__icon {
-  display: inline-flex;
-  font-size: 34px;
-  color: var(--app-ink);
+.feature-cell__media {
+  display: inline-block;
+  height: 44px;
+  width: auto;
+  vertical-align: top;
   margin-bottom: 20px;
 }
 
-.feature-cell:hover .feature-cell__icon,
-.feature-cell:focus-within .feature-cell__icon {
+.feature-cell:hover .feature-cell__media,
+.feature-cell:focus-within .feature-cell__media {
   animation: icon-play 0.7s ease;
 }
 
@@ -824,178 +666,68 @@ input:focus-visible,
   font-size: 14px;
   color: var(--app-ink-muted);
   min-height: 44px;
+  animation: rise 0.4s ease;
+}
+
+/* Steps scroll past the sticky intro; the one in the middle of the screen is active */
+.ai-showcase__steps {
+  display: flex;
+  flex-direction: column;
+  gap: 140px;
+}
+
+.ai-step {
+  opacity: 0.3;
+  transition: opacity 0.5s ease;
+}
+
+.ai-step.is-active {
+  opacity: 1;
+}
+
+.ai-step__hint {
+  display: none;
 }
 
 .ai-showcase__intro .caption {
   margin-top: 16px;
 }
 
-.chat-panel {
-  background: #ffffff;
-  border-radius: 12px;
+/* The iframe extends past its column so the glow and shadow around the phone aren't clipped */
+#ai {
+  overflow-x: clip;
 }
 
-.chat-panel__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--app-grid-line);
-  font-size: 14px;
+.ai-showcase__phone {
+  margin: -40px -56px -60px;
 }
 
-.chat-panel__head span:first-child {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 500;
-}
-
-.chat-panel__head span:last-child {
-  font-size: 12px;
-  color: var(--app-ink-muted);
-}
-
-.chat-panel__body {
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-  padding: 24px 20px 28px;
-  min-height: 560px;
-}
-
-.chat-msg {
-  display: grid;
-  grid-template-columns: 40px 1fr;
-  gap: 14px;
-  animation: rise 0.4s ease both;
-}
-
-.chat-msg__avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1px solid var(--app-grid-line);
-  background: var(--app-bg-warm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--app-ink-muted);
-}
-
-.chat-msg--ai .chat-msg__avatar {
-  background: var(--app-ink);
-  border-color: var(--app-ink);
-  color: #ffffff;
-}
-
-.chat-msg__who {
-  font-size: 13px;
-  color: var(--app-ink-muted);
-  margin-bottom: 6px;
-}
-
-.chat-msg__who strong {
-  color: var(--app-ink);
-  font-weight: 600;
-}
-
-.chat-msg__bubble {
-  background: var(--app-surface-muted);
-  border-radius: 12px;
-  padding: 14px 16px;
-  font-size: 14.5px;
-  line-height: 1.55;
-}
-
-.chat-msg__items {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.chat-item {
-  background: #ffffff;
-  border-radius: 8px;
-  padding: 10px 12px;
-}
-
-.chat-item__type {
+.ai-showcase__phone iframe {
   display: block;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--app-ink-muted);
-  margin-bottom: 2px;
-}
-
-.chat-item__row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 12px;
-  font-weight: 600;
-}
-
-.chat-item__share {
-  flex-shrink: 0;
-  font-size: 13px;
-  color: var(--brand-500);
-}
-
-.chat-item__toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 6px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--app-ink-muted);
-}
-
-.chat-item__toggle:hover {
-  color: var(--app-ink);
-}
-
-.chat-item__quote {
-  margin-top: 6px;
-  font-size: 13.5px;
-  color: var(--app-ink-muted);
-}
-
-.chat-msg__note {
-  margin-top: 10px;
-  font-size: 13px;
-  color: var(--app-ink-muted);
+  width: 100%;
+  height: 960px;
+  border: 0;
+  background: transparent;
 }
 
 /* ── 5. Audience metrics ───────────────────────────────────────────────── */
+/* Value, label and text sit on shared rows (subgrid), so every column lines up
+   regardless of how many lines its label wraps to. */
 .metrics-row {
   list-style: none;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  border-top: 1px solid var(--app-grid-line);
+  column-gap: 40px;
 }
 
 .metric {
-  display: flex;
-  flex-direction: column;
-  padding: 36px 28px 8px;
-  border-right: 1px solid var(--app-grid-line);
-}
-
-.metric:first-child {
-  padding-left: 0;
-}
-
-.metric:last-child {
-  border-right: 0;
-  padding-right: 0;
+  display: grid;
+  grid-row: span 3;
+  grid-template-rows: subgrid;
+  row-gap: 0;
+  align-content: start;
+  padding-top: 28px;
+  border-top: 1px solid var(--app-ink);
 }
 
 .metric__value {
@@ -1003,42 +735,20 @@ input:focus-visible,
   line-height: 1;
   font-weight: 500;
   letter-spacing: -0.04em;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .metric__label {
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 600;
+  text-wrap: balance;
   margin-bottom: 12px;
 }
 
 .metric__text {
-  flex: 1;
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 1px solid var(--app-grid-line);
   font-size: 15px;
   line-height: 1.6;
-}
-
-.metric__who {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 28px;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.metric__who-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: 1px solid var(--app-grid-line);
-  background: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   color: var(--app-ink-muted);
 }
 
@@ -1056,6 +766,15 @@ input:focus-visible,
 
 .manifesto__text .nowrap {
   white-space: nowrap;
+}
+
+.manifesto__word {
+  opacity: 0.16;
+  transition: opacity 0.35s ease;
+}
+
+.manifesto__word.is-lit {
+  opacity: 1;
 }
 
 .manifesto__chip {
@@ -1077,10 +796,19 @@ input:focus-visible,
   height: 0.45em;
 }
 
-.manifesto__chip--dark {
-  background: var(--app-ink);
-  border-color: var(--app-ink);
-  color: #ffffff;
+/* Sparkles stand on their own: no pill, sized close to the letters */
+.manifesto__chip--bare {
+  height: 1em;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  vertical-align: -0.08em;
+}
+
+.manifesto__chip .manifesto__sparkles {
+  width: 1em;
+  height: 1em;
 }
 
 /* ── 7. Pricing ────────────────────────────────────────────────────────── */
@@ -1304,22 +1032,40 @@ input:focus-visible,
   .ai-showcase__intro {
     position: static;
   }
+  .ai-showcase__phone {
+    margin-inline: 0;
+  }
+  .ai-showcase__modes,
+  .ai-showcase__mode-hint {
+    display: none;
+  }
+  .ai-showcase__intro .lead {
+    margin-bottom: 24px;
+  }
+  .ai-showcase__steps {
+    gap: 72px;
+  }
+  .ai-step {
+    opacity: 1;
+  }
+  .ai-step__hint {
+    display: block;
+    margin: 0 0 8px;
+    font-size: 15px;
+    color: var(--app-ink-muted);
+  }
+  .ai-step__hint strong {
+    display: block;
+    font-size: 18px;
+    color: var(--app-ink);
+  }
 
   .metrics-row {
     grid-template-columns: repeat(2, 1fr);
+    column-gap: 32px;
   }
-  .metric,
-  .metric:first-child,
-  .metric:last-child {
-    padding: 32px 24px 32px 0;
-    border-right: 0;
-    border-bottom: 1px solid var(--app-grid-line);
-  }
-  .metric:nth-child(odd) {
-    border-right: 1px solid var(--app-grid-line);
-  }
-  .metric:nth-child(even) {
-    padding-left: 24px;
+  .metric {
+    padding-bottom: 40px;
   }
 
   .faq-layout {
@@ -1359,12 +1105,8 @@ input:focus-visible,
   .demo-section {
     padding-bottom: 64px;
   }
-  .video-demo-screen {
-    aspect-ratio: 4 / 3;
-  }
-  .video-demo-bg-mockup,
-  .video-demo-duration {
-    display: none;
+  .workspace-demo iframe {
+    aspect-ratio: 390 / 844;
   }
 
   .feature-grid {
@@ -1379,24 +1121,11 @@ input:focus-visible,
     padding: 22px 18px;
     text-align: left;
   }
-  .feature-cell__icon {
+  .feature-cell__media {
     grid-row: span 2;
-    font-size: 26px;
-    margin: 2px 0 0;
-  }
-
-  .chat-panel__body {
-    min-height: 0;
-    padding: 20px 14px 24px;
-  }
-  .chat-msg {
-    grid-template-columns: 32px 1fr;
-    gap: 10px;
-  }
-  .chat-msg__avatar {
-    width: 32px;
-    height: 32px;
-    font-size: 11px;
+    height: 34px;
+    margin: 0;
+    align-self: center;
   }
 
   .survey-modal__foot {
@@ -1431,7 +1160,7 @@ input:focus-visible,
     bottom: 0;
     z-index: 900;
     padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
-    background: rgba(250, 249, 247, 0.92);
+    background: rgba(255, 255, 255, 0.92);
     backdrop-filter: blur(10px);
     border-top: 1px solid var(--app-grid-line);
   }
@@ -1444,15 +1173,11 @@ input:focus-visible,
   .metrics-row {
     grid-template-columns: 1fr;
   }
-  .metric,
-  .metric:first-child,
-  .metric:last-child,
-  .metric:nth-child(even) {
-    padding: 28px 0;
-    border-right: 0;
+  .metric {
+    padding: 24px 0 32px;
   }
-  .metric:nth-child(odd) {
-    border-right: 0;
+  .metric__value {
+    margin-bottom: 14px;
   }
 }
 

@@ -208,6 +208,7 @@ html[data-theme='light'] {
   --app-shadow: rgba(0, 0, 0, 0.2);
 
   /* Landing: warm "blueprint" palette */
+  --app-page: #ffffff;
   --app-bg-warm: #faf9f7;
   --app-surface-muted: #f1efec;
   --app-grid-line: #e4e0db;

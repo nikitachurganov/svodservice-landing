@@ -1,0 +1,41 @@
+<svg width="694" height="617" viewBox="-7 -33 694 617" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <!-- Звезда ИИ — акцент; её нижняя часть уходит под стеклянный вариант ответа и размывается -->
+  <g id="back">
+    <path d="M520 40C543 190 581 227 680 250C581 273 543 310 520 460C497 310 459 273 360 250C459 227 497 190 520 40Z" fill="#FD6A12"/>
+  </g>
+  <clipPath id="glass">
+    <rect x="0" y="340" width="640" height="170" rx="85"/>
+  </clipPath>
+  <filter id="frost" x="-20%" y="-20%" width="140%" height="140%">
+    <feGaussianBlur stdDeviation="16"/>
+  </filter>
+  <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
+    <stop stop-color="#fff" stop-opacity=".9"/>
+    <stop offset=".4" stop-color="#fff" stop-opacity=".15"/>
+    <stop offset=".75" stop-color="#fff" stop-opacity=".05"/>
+    <stop offset="1" stop-color="#fff" stop-opacity=".6"/>
+  </linearGradient>
+</defs>
+
+<!-- Приглушённый вариант ответа с радиокнопкой -->
+<rect x="0" y="150" width="470" height="150" rx="75" fill="#FEC3A0" fill-opacity="0.7"/>
+<circle cx="80" cy="225" r="30" stroke="white" stroke-width="10"/>
+<circle cx="80" cy="225" r="13" fill="white"/>
+<rect x="140" y="205" width="190" height="40" rx="20" fill="white" fill-opacity="0.85"/>
+
+<use href="#back"/>
+
+<!-- Стеклянный вариант ответа: под ним звезда размыта, сверху тонировка и блик по кромке -->
+<g clip-path="url(#glass)">
+  <rect x="0" y="340" width="640" height="170" fill="#F5F5F5"/>
+  <use href="#back" filter="url(#frost)"/>
+  <rect x="0" y="340" width="640" height="170" fill="#FD6A12" fill-opacity="0.33"/>
+</g>
+<rect x="2" y="342" width="636" height="166" rx="83" stroke="url(#rim)" stroke-width="4"/>
+
+<!-- Отмеченный чекбокс и подпись -->
+<rect x="60" y="385" width="80" height="80" rx="22" fill="white"/>
+<path d="M80 425L95 440L121 412" stroke="#FD6A12" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="172" y="405" width="240" height="40" rx="20" fill="white"/>
+</svg>
